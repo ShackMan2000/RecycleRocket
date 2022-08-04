@@ -16,7 +16,7 @@ public class ThrustController : MonoBehaviour
     public float speedMagnitude => Vector3.Magnitude(velocity);
 
     [SerializeField]
-    private JetPackInput jetPack01, jetPack02;
+    private RocketThrustController jetPack01, jetPack02;
 
 
     [SerializeField]
@@ -35,17 +35,17 @@ public class ThrustController : MonoBehaviour
 
     private void OnEnable()
     {
-        jetPack01.EvtThrustChanged += ChangeForce;
-        jetPack02.EvtThrustChanged += ChangeForce;
+     //   jetPack01.EvtThrustChanged += ChangeForce;
+       // jetPack02.EvtThrustChanged += ChangeForce;
     }
 
 
    
     
-    public void ChangeForce(Vector3 newForce)
-    {
-        currentForce = (jetPack01.CurrentForce  + jetPack02.CurrentForce) / 2f * addForceMulti;      
-    }
+    //public void ChangeForce(Vector3 newForce)
+    //{
+    //    currentForce = (jetPack01.CurrentForce  + jetPack02.CurrentForce) / 2f * addForceMulti;      
+    //}
 
 
     public Vector3 TestVelocity;
@@ -73,8 +73,8 @@ public class ThrustController : MonoBehaviour
 
     private void OnDisable()
     {
-        jetPack01.EvtThrustChanged -= ChangeForce;
-        jetPack02.EvtThrustChanged -= ChangeForce;
+       // jetPack01.EvtThrustChanged -= ChangeForce;
+     //   jetPack02.EvtThrustChanged -= ChangeForce;
     }
 
 

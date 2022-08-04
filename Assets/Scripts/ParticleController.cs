@@ -15,7 +15,7 @@ public class ParticleController : MonoBehaviour
     private ParticleSystem sys;
 
     [SerializeField]
-    private JetPackInput jetPackInput;
+    private RocketThrustController rocketThrust;
 
 
     [SerializeField]
@@ -37,22 +37,23 @@ public class ParticleController : MonoBehaviour
 
 
     private void OnEnable()
-    {        
+    {
 
-        jetPackInput.EvtThrustInputChanged += SetStartSpeed;
+        RocketThrustController.EvtThrustInputChanged += SetStartSpeed;
 
+
+        // smoke needs to move up and down, fire doesn't
         if (minPosition != maxPosition)
-            jetPackInput.EvtThrustInputChanged += SetPosition;
+            RocketThrustController.EvtThrustInputChanged += SetPosition;
 
 
         if (minEmission != maxEmission)
-            jetPackInput.EvtThrustInputChanged += SetEmission;
+            RocketThrustController.EvtThrustInputChanged += SetEmission;
 
 
         sysEmit = sys.emission;
 
         sysMain = sys.main;
-
     }
 
 
@@ -91,13 +92,13 @@ public class ParticleController : MonoBehaviour
 
     private void OnDisable()
     {
-        jetPackInput.EvtThrustInputChanged -= SetStartSpeed;
+        RocketThrustController.EvtThrustInputChanged -= SetStartSpeed;
 
         if (minPosition != maxPosition)
-            jetPackInput.EvtThrustInputChanged -= SetPosition;
+            RocketThrustController.EvtThrustInputChanged -= SetPosition;
 
         if (minEmission != maxEmission)
-            jetPackInput.EvtThrustInputChanged -= SetEmission;
+            RocketThrustController.EvtThrustInputChanged -= SetEmission;
     }
 
 
