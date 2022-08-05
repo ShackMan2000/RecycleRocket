@@ -5,5 +5,12 @@ using UnityEngine;
 public interface IGrabbable
 {
 
-    Transform trans { get; }
+    Transform snapPoint { get; }
+
+
+
+
+    public void MoveToHand(Transform t);
+
+
 }

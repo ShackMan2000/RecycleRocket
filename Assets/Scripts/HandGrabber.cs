@@ -25,6 +25,8 @@ public class HandGrabber : MonoBehaviour
     public List<Transform> debugGrabbableInRange;
 
 
+    private IGrabbable activeGrabbable;
+
     [SerializeField]
     private InputActionAsset playerControls;
 
@@ -83,11 +85,7 @@ public class HandGrabber : MonoBehaviour
         //grab.Enable();
     }
 
-    private void CheckGrab(InputAction.CallbackContext obj)
-    {
-
-        print("grab");
-    }
+  
 
 
     private void OnTriggerEnter(Collider other)
@@ -137,19 +135,7 @@ public class HandGrabber : MonoBehaviour
     public float grabValue;
 
     private void Update()
-    {
-        //if (pressA.IsPressed())
-        //{
-        //    ThrustSliderValue += Time.deltaTime;
-
-        //    // ThrustInputChanged(ThrustSliderValue);
-        //}
-        //else if (pressB.IsPressed())
-        //{
-        //    ThrustSliderValue -= Time.deltaTime;
-        //    //    ThrustInputChanged(ThrustSliderValue);
-        //}
-
+    { 
         grabValue = grab.ReadValue<float>();
 
         if (!isPushingGrabButton && grabValue > 0.05f)
@@ -163,20 +149,20 @@ public class HandGrabber : MonoBehaviour
         }
 
 
+        if(activeGrabbable != null)
+        {
+            handModel.transform.position = activeGrabbable.snapPoint.position;
+            activeGrabbable.MoveToHand(handAnchor);
 
-
-        if(isGrabbingHandler)
-            handModel.transform.position = grabbedTransform.position;
+        }
     }
 
 
     [SerializeField]
-    private Transform handModel;
+    private Transform handModel, handAnchor;
 
 
-    private bool isGrabbingHandler;
 
-    private Transform grabbedTransform;
 
     private void TryToGrabSomething()
     {
@@ -184,8 +170,7 @@ public class HandGrabber : MonoBehaviour
         print("trying to grab");
         if (grabbableInRange.Count == 0) return;
 
-        isGrabbingHandler = true;
-        grabbedTransform = grabbableInRange[0].trans;
+        activeGrabbable = grabbableInRange[0];
         //place the hand model at the cube
 
        
