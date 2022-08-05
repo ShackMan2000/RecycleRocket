@@ -13,8 +13,8 @@ public class Hologram : MonoBehaviour
 
 
 
-
-    private Transform nextRing;
+    [SerializeField]
+    private Transform originalRocket;
 
 
     
@@ -25,7 +25,7 @@ public class Hologram : MonoBehaviour
 
     private void Update()
     {
-        transform.LookAt(nextRing);
+        transform.rotation = originalRocket.rotation;
     }
 
 
