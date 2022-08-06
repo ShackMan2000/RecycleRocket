@@ -32,9 +32,19 @@ public class HandGrabber : MonoBehaviour
 
     private InputAction pressA, pressB, grab;
 
-    private Vector3 handStartPosition;
+    private Vector3 handOriginalLocaPosition;
 
     private float thrustSliderValue;
+
+
+    public float maxDistanceHandToAnchor;
+
+    public float currentDistanceHandToAnchor;
+
+
+    [SerializeField]
+    private Transform handModel, handAnchor;
+
 
     //public float ThrustSliderValue
     //{
@@ -66,7 +76,7 @@ public class HandGrabber : MonoBehaviour
     {
         //   ThrustInputChanged(0f);
 
-        handStartPosition = handModel.transform.localPosition;
+        handOriginalLocaPosition = handModel.transform.localPosition;
         
         grabbableInRange = new List<IGrabbable>();
 
@@ -128,41 +138,44 @@ public class HandGrabber : MonoBehaviour
         }
     }
 
-
-
-
     public bool isPushingGrabButton;
     public float grabValue;
+
+
+
+
 
     private void Update()
     { 
         grabValue = grab.ReadValue<float>();
 
+        //start grabbing
         if (!isPushingGrabButton && grabValue > 0.05f)
         {
             isPushingGrabButton = true;
             TryToGrabSomething();
         }
+        //stop grabbing
         else if (isPushingGrabButton && grabValue < 0.05f)
         {
-            isPushingGrabButton = false;
+            StopGrabbing();
+
         }
 
 
-        if(activeGrabbable != null)
+        if (activeGrabbable != null)
         {
             handModel.transform.position = activeGrabbable.snapPoint.position;
             activeGrabbable.MoveToHand(handAnchor);
-
         }
     }
 
-
-    [SerializeField]
-    private Transform handModel, handAnchor;
-
-
-
+    private void StopGrabbing()
+    {
+        isPushingGrabButton = false;
+        activeGrabbable = null;
+        handModel.transform.localPosition = handOriginalLocaPosition;
+    }
 
     private void TryToGrabSomething()
     {

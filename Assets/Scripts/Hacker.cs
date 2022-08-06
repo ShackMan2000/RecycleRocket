@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
+
 
 public class Hacker : MonoBehaviour
 {
@@ -10,15 +12,31 @@ public class Hacker : MonoBehaviour
 
 
 
- 
+
+
+    [SerializeField]
+    private TextMeshProUGUI rocketSpeedText, distanceToGrabText;
+
+    //[SerializeField]
+    //private Rigidbody rocketRigidBody;
+
+
+
+
+
+
+
+    //[SerializeField]
+    //private RocketPhysics rocketPhysics;
+
+
+
 
     private void OnEnable()
     {
         print("WARNING, hacker is in the scene");
-
-
-
         
+
     }
 
 
@@ -28,6 +46,10 @@ public class Hacker : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
             ReloadScene();
+
+
+
+       // rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetAbsoluteFallSpeed().ToString("F1");
     }
 
 
@@ -44,4 +66,7 @@ public class Hacker : MonoBehaviour
 
 
 
+
+
 }
+
