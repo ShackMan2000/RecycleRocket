@@ -7,10 +7,6 @@ using UnityEngine.InputSystem;
 public class RocketThrustController : MonoBehaviour
 {
 
-    //[SerializeField]
-    //private OVRInput.Controller m_controller = OVRInput.Controller.None;
-
-
 
     [SerializeField]
     private InputActionAsset playerControls;
@@ -19,24 +15,29 @@ public class RocketThrustController : MonoBehaviour
 
 
 
-    private float thrustSliderValue;
+    //private float thrustSliderValue;
 
-    public float ThrustSliderValue
+    //public float ThrustSliderValue
+    //{
+    //    get => thrustSliderValue;
+
+    //    set
+    //    {
+    //        thrustSliderValue = Mathf.Clamp(value, 0f, 1f);
+    //        ThrustInputChanged(thrustSliderValue);
+    //    }
+    //}
+
+
+    [SerializeField]
+    private SliderControl sliderControl;
+
+
+    private void OnEnable()
     {
-        get => thrustSliderValue;
-
-        set
-        {
-            thrustSliderValue = Mathf.Clamp(value, 0f, 1f);
-            ThrustInputChanged(thrustSliderValue);
-        }
+        sliderControl.EvtSliderValueChanged += ThrustInputChanged;
+        
     }
-
-
-
-
-    //only use one event here? probably used input to get the percent of max thrust for particles
-    //  public event Action<Vector3> EvtThrustChanged = delegate { };
 
 
     // rocket only needs to know when thrust changes, can store the last input in a variable and change that through listening to this event
@@ -50,19 +51,19 @@ public class RocketThrustController : MonoBehaviour
         ThrustInputChanged(0f);
 
 
-        var gamePlayActionMap = playerControls.FindActionMap("XRI RightHand Interaction");
+    //    var gamePlayActionMap = playerControls.FindActionMap("XRI RightHand Interaction");
 
-        pressA = gamePlayActionMap.FindAction("Press A");
-        pressB = gamePlayActionMap.FindAction("Press B");
+    //    pressA = gamePlayActionMap.FindAction("Press A");
+     //   pressB = gamePlayActionMap.FindAction("Press B");
 
 
         //   pressA.performed += SetThrustToOne;
     }
 
-    private void SetThrustToOne(InputAction.CallbackContext obj)
-    {
-        // ThrustInputChanged(0.9f);
-    }
+    //private void SetThrustToOne(InputAction.CallbackContext obj)
+    //{
+    //    // ThrustInputChanged(0.9f);
+    //}
 
 
 
@@ -78,24 +79,25 @@ public class RocketThrustController : MonoBehaviour
     // for now could use button to increase and decrease (and add a check to not do anything if decreasing and already at 0
 
 
-    private void Update()
-    {
-        if (pressA.IsPressed())
-        {
-            ThrustSliderValue += Time.deltaTime;
+    //private void Update()
+    //{
+    //    if (pressA.IsPressed())
+    //    {
+    //        ThrustSliderValue += Time.deltaTime;
 
-            // ThrustInputChanged(ThrustSliderValue);
-        }
-        else if(pressB.IsPressed())
-        {
-            ThrustSliderValue -= Time.deltaTime;
-            //    ThrustInputChanged(ThrustSliderValue);
-        }
+    //        // ThrustInputChanged(ThrustSliderValue);
+    //    }
+    //    else if(pressB.IsPressed())
+    //    {
+    //        ThrustSliderValue -= Time.deltaTime;
+    //        //    ThrustInputChanged(ThrustSliderValue);
+    //    }
 
-    }
+    //}
 
 
 
+    //not really necessary to rout through this script
 
 
     public void ThrustInputChanged(float newInput)
@@ -113,6 +115,14 @@ public class RocketThrustController : MonoBehaviour
 
         EvtThrustInputChanged(newInput);
         //   EvtThrustChanged(currentForce);
+    }
+
+
+
+
+    private void OnDisable()
+    {
+        sliderControl.EvtSliderValueChanged += ThrustInputChanged;
     }
 }
 

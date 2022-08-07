@@ -13,7 +13,7 @@ public class ControlPanelUI : MonoBehaviour
 
 
     [SerializeField]
-    private TextMeshProUGUI rocketSpeedText, thrustSliderValueText;
+    private TextMeshProUGUI rocketSpeedText, thrustSliderValueText, rotateForceText;
 
     [SerializeField]
     private Rigidbody rocketRigidBody;
@@ -26,6 +26,18 @@ public class ControlPanelUI : MonoBehaviour
     private RocketPhysics rocketPhysics;
 
 
+    [SerializeField]
+    private ControlSliderMultiAxis rotationControl;
+
+
+
+    private void OnEnable()
+    {
+        //rotationControl.EvtSliderValueChanged += ShowRotationForceText;
+        //rotateForceText.text = "0 rot";
+    }
+
+
 
     private void Update()
     {
@@ -34,4 +46,21 @@ public class ControlPanelUI : MonoBehaviour
         thrustSliderValueText.text = thrustSlider.SliderValue.ToString("F1");
     }
 
+
+
+
+    private void ShowRotationForceText(Vector2 force)
+    {
+
+        rotateForceText.text = force.ToString();
+    }
+
+
+
+
+
+    private void OnDisable()
+    {
+     //   rotationControl.EvtSliderValueChanged -= ShowRotationForceText;
+    }
 }

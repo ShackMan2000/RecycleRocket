@@ -5,12 +5,18 @@ using UnityEngine;
 public interface IGrabbable
 {
 
-    Transform snapPoint { get; }
+    Transform SnapPoint { get; }
 
 
+  //  bool IsGrabbed { get; }
 
 
-    public void MoveToHand(Transform t);
+    public void StartGrabbing(Transform handAnchor);
+
+    public void StopGrabbing();
+
+
+  //  public void MoveToHand(Transform t);
 
 
 }

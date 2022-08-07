@@ -20,12 +20,16 @@ public class HandGrabber : MonoBehaviour
 
 
 
+    [SerializeField]
+    private Transform anchorHelper;
+
+
     private List<IGrabbable> grabbableInRange;
 
     public List<Transform> debugGrabbableInRange;
 
 
-    private IGrabbable activeGrabbable;
+    private IGrabbable grabbedObject;
 
     [SerializeField]
     private InputActionAsset playerControls;
@@ -59,7 +63,7 @@ public class HandGrabber : MonoBehaviour
 
 
 
- 
+
 
 
     //only use one event here? probably used input to get the percent of max thrust for particles
@@ -77,7 +81,7 @@ public class HandGrabber : MonoBehaviour
         //   ThrustInputChanged(0f);
 
         handOriginalLocaPosition = handModel.transform.localPosition;
-        
+
         grabbableInRange = new List<IGrabbable>();
 
 
@@ -95,7 +99,7 @@ public class HandGrabber : MonoBehaviour
         //grab.Enable();
     }
 
-  
+
 
 
     private void OnTriggerEnter(Collider other)
@@ -114,9 +118,6 @@ public class HandGrabber : MonoBehaviour
                 print("WARNING, grabbable already in list, shouldn't happen because TriggerExit should remove it");
             }
         }
-        //add grabbable to list
-
-
     }
 
 
@@ -146,7 +147,7 @@ public class HandGrabber : MonoBehaviour
 
 
     private void Update()
-    { 
+    {
         grabValue = grab.ReadValue<float>();
 
         //start grabbing
@@ -158,66 +159,92 @@ public class HandGrabber : MonoBehaviour
         //stop grabbing
         else if (isPushingGrabButton && grabValue < 0.05f)
         {
-            StopGrabbing();
+            isPushingGrabButton = false;
+
+            if (grabbedObject != null)
+                StopGrabbing();
 
         }
 
+    }
 
-        if (activeGrabbable != null)
+
+    private void LateUpdate()
+    {
+        MoveHand();
+
+    }
+
+    private void MoveHand()
+    {
+        if (grabbedObject != null)
         {
-            handModel.transform.position = activeGrabbable.snapPoint.position;
-            activeGrabbable.MoveToHand(handAnchor);
+            handModel.transform.position = grabbedObject.SnapPoint.position;
+
+            CheckDistanceHandToGrabbedObject();
+        }
+    }
+
+    private void CheckDistanceHandToGrabbedObject()
+    {
+
+        //problem here is that there is always a distance bc hand is not at 000
+        // for now just make distance bigger....
+        currentDistanceHandToAnchor = Vector3.Distance(handModel.transform.position, handAnchor.transform.position);
+        if (currentDistanceHandToAnchor > maxDistanceHandToAnchor)
+        {
+            StopGrabbing();
         }
     }
 
     private void StopGrabbing()
     {
-        isPushingGrabButton = false;
-        activeGrabbable = null;
+        grabbedObject.StopGrabbing();
+        grabbedObject = null;
         handModel.transform.localPosition = handOriginalLocaPosition;
     }
 
     private void TryToGrabSomething()
     {
-
-        print("trying to grab");
         if (grabbableInRange.Count == 0) return;
 
-        activeGrabbable = grabbableInRange[0];
-        //place the hand model at the cube
 
-       
+        //change to grab the closest one
+        grabbedObject = GetClosestGrabbableInRange();
+
+        //for multiSlider this is redundant, but normal slider still needs it
+        anchorHelper.transform.position = grabbedObject.SnapPoint.position;
+        grabbedObject.StartGrabbing(anchorHelper);
+    }
 
 
-        //then check distance of the grabbable and the anchor, if it is too big, 
 
-        //grab the closest thing that can be grabbed.
 
+    private IGrabbable GetClosestGrabbableInRange()
+    {
+        float closestDistance = 11110f;
+        IGrabbable closestGrabbable = null;
+
+
+        for (int i = 0; i < grabbableInRange.Count; i++)
+        {
+            if (Vector3.Distance(transform.position, grabbableInRange[i].SnapPoint.position) < closestDistance)
+            {
+                closestGrabbable = grabbableInRange[i];
+                closestDistance = Vector3.Distance(transform.position, grabbableInRange[i].SnapPoint.position);
+            }
+
+        }
+
+
+        return closestGrabbable;
 
     }
 
 
-    // hand should have a list of Igrabbable 
-
-
-
-
-
     public void ThrustInputChanged(float newInput)
     {
-        //at 0 input this method still needs to run once to inform listeners (thrust/particles etc.)
-        //if (newInput <= 0.01f)
-        //    noThrustInput = true;
-
-        //   currentForce = newInput * engine.forward;
-
-
-        //  currentFanRotationSpeed = newInput * maxFanRotationSpeed + (1f - newInput) * minFanRotationSpeed;
-
-
-
         EvtTryingToGrabSomethingNew(newInput);
-        //   EvtThrustChanged(currentForce);
     }
 
 }

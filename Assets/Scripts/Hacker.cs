@@ -15,7 +15,7 @@ public class Hacker : MonoBehaviour
 
 
     [SerializeField]
-    private TextMeshProUGUI rocketSpeedText, distanceToGrabText;
+    private TextMeshProUGUI distanceToGrabText;
 
     //[SerializeField]
     //private Rigidbody rocketRigidBody;
@@ -24,6 +24,8 @@ public class Hacker : MonoBehaviour
 
 
 
+    [SerializeField]
+    private HandGrabber handGrabber;
 
 
     //[SerializeField]
@@ -47,7 +49,7 @@ public class Hacker : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
             ReloadScene();
 
-
+        distanceToGrabText.text = handGrabber.currentDistanceHandToAnchor.ToString("F2");
 
        // rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetAbsoluteFallSpeed().ToString("F1");
     }
@@ -56,7 +58,6 @@ public class Hacker : MonoBehaviour
 
     private void ReloadScene()
     {
-        print("reload");
         Scene scene = SceneManager.GetActiveScene(); 
         SceneManager.LoadScene(scene.name);
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class SliderControl : MonoBehaviour, IGrabbable
 {
-    public Transform snapPoint { get => transform; }
+    public Transform SnapPoint { get => transform; }
 
 
     //   public Transform TESTtarget;
@@ -24,6 +24,11 @@ public class SliderControl : MonoBehaviour, IGrabbable
         }
     }
 
+    private bool isGrabbed;
+
+
+
+    private Transform target;
 
     //private void Update()
     //{
@@ -34,23 +39,33 @@ public class SliderControl : MonoBehaviour, IGrabbable
 
 
 
-    private void Awake()
+    public void StartGrabbing(Transform t)
     {
-
-
-
+        target = t;
+        isGrabbed = true;
     }
 
 
 
 
-    public void MoveToHand(Transform t)
+
+
+    private void Update()
+    {
+        if (isGrabbed)
+            MoveToHand();
+    }
+
+
+
+
+
+    public void MoveToHand()
     {
         localPositionTemp = transform.localPosition;
 
 
-        //transform.position = new Vector3(transform.position.x, transform.position.y, target.transform.position.z);
-        transform.position = t.transform.position;
+        transform.position = target.transform.position;
 
 
         float clampedZ = Mathf.Clamp(transform.localPosition.z, -maxSlide, maxSlide);
@@ -58,5 +73,11 @@ public class SliderControl : MonoBehaviour, IGrabbable
         transform.localPosition = new Vector3(localPositionTemp.x, localPositionTemp.y, clampedZ);
 
         EvtSliderValueChanged(SliderValue);
+    }
+
+
+    public void StopGrabbing()
+    {
+        isGrabbed = false;
     }
 }

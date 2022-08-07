@@ -18,6 +18,9 @@ public class RocketPhysics : MonoBehaviour
 
     public float currentForce;
 
+
+    private Vector2 rotationForce;
+
     private Vector3 velocity;
 
 
@@ -26,6 +29,10 @@ public class RocketPhysics : MonoBehaviour
 
 
     public Queue<Vector3> averageSpeed;
+
+
+    [SerializeField]
+    private ControlSliderMultiAxis rotationControl;
 
 
 
@@ -43,7 +50,10 @@ public class RocketPhysics : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         averageSpeed = new Queue<Vector3>();
 
+        rotationForce = Vector2.zero;
+
         RocketThrustController.EvtThrustInputChanged += ChangeForce;
+     //   rotationControl.EvtSliderValueChanged += ChangeRotationForce;
     }
 
 
@@ -54,11 +64,14 @@ public class RocketPhysics : MonoBehaviour
             rb.velocity = new Vector3(rb.velocity.x, maxFallSpeed, rb.velocity.z);
 
 
-        if (Input.GetKey(KeyCode.LeftArrow))
-            AddRotationForce(new Vector2(-1f, 0f));
-        else if (Input.GetKey(KeyCode.RightArrow))
-            AddRotationForce(new Vector2(1f, 0f));
-
+        //if (Input.GetKey(KeyCode.LeftArrow))
+        //    AddRotationForce(new Vector2(-1f, 0f));
+        //else if (Input.GetKey(KeyCode.RightArrow))
+        //    AddRotationForce(new Vector2(1f, 0f));
+        //else if (Input.GetKey(KeyCode.UpArrow))
+        //    AddRotationForce(new Vector2(0f, 1f));
+        //else if (Input.GetKey(KeyCode.DownArrow))
+        //    AddRotationForce(new Vector2(0f, -1f));
 
     }
 
@@ -71,6 +84,12 @@ public class RocketPhysics : MonoBehaviour
     public void ChangeForce(float newForce)
     {
         currentForce = newForce * addForceMulti;
+    }
+
+
+    public void ChangeRotationForce(Vector2 newForce)
+    {
+        rotationForce = newForce;
     }
 
 
@@ -94,6 +113,10 @@ public class RocketPhysics : MonoBehaviour
         rb.velocity = velocity;
         TestVelocity = velocity;
         UpdateAverageSpeed(rb.velocity);
+
+
+        if (rotationForce != Vector2.zero)
+            AddRotationForce(rotationForce);
     }
 
 
@@ -102,18 +125,10 @@ public class RocketPhysics : MonoBehaviour
     public float rotationForceMulti;
 
 
-    // this needs to be changed so it adds the force in fixed update but makes sure that an input isn't lost
-    // like frame could happen within a fixedupdate. though that doesn't matter for now, player won't feel it when using a joystick
-    // unity simply checks for input in fixed update.
-
-    // just use joystick, while it is being moved, it changes the Vector 2 that is applied all the time.
-    // as soon as the player let's go, the joystick will move back into 0,0
-
-
 
     public void AddRotationForce(Vector2 force)
     {
-        rb.AddRelativeTorque(new Vector3(force.x, 0f, force.y) * rotationForceMulti);
+        rb.AddRelativeTorque(new Vector3(force.y, 0f, force.x) * rotationForceMulti);
     }
 
 
@@ -167,6 +182,8 @@ public class RocketPhysics : MonoBehaviour
     private void OnDisable()
     {
         RocketThrustController.EvtThrustInputChanged -= ChangeForce;
+     //   rotationControl.EvtSliderValueChanged -= ChangeRotationForce;
+
     }
 
 
