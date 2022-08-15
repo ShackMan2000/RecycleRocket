@@ -41,9 +41,9 @@ public class ControlPanelUI : MonoBehaviour
 
     private void Update()
     {
-        rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetAbsoluteFallSpeed().ToString("F1");
+        rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetVerticalSpeed().ToString("F1");
 
-        thrustSliderValueText.text = thrustSlider.SliderValue.ToString("F1");
+       // thrustSliderValueText.text = thrustSlider.SliderValue.ToString("F1");
     }
 
 

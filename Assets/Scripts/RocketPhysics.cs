@@ -6,23 +6,22 @@ using UnityEngine;
 public class RocketPhysics : MonoBehaviour
 {
 
-    // listen to input from rocket thrust controller (which sends a float for thrust, thrust is always applied based on the rockets Z)
-    // test that rocket flies to the side when it tilts and thrust is added.
-    // cap speed (use magnitude so it's capped in all directions
-
 
     private Rigidbody rb;
 
     [SerializeField]
     private float maxFallSpeed = -10f;
 
-    public float currentForce;
+    public float currentLaunchForce, currentLandingBurnFoce;
 
 
-    private Vector2 rotationForce;
+    private float xRotationForce, yRotationForce;
 
-    private Vector3 velocity;
+    public Vector3 velocity;
 
+
+    [SerializeField]
+    private float maxSpeedForLanding;
 
     [SerializeField]
     private float maxVelocity;
@@ -32,30 +31,34 @@ public class RocketPhysics : MonoBehaviour
 
 
     [SerializeField]
-    private ControlSliderMultiAxis rotationControl;
-
-
-
-    [SerializeField]
     private GameSettings settings;
 
 
     public static event Action<Vector3> EvtRocketExploded = delegate { };
 
 
+    [SerializeField]
+    private SliderControl launchThrustSlider, landingBurnThrustSlider, rotateXslider, rotateYslider;
 
+
+    [SerializeField]
+    private float launchForceMulti, rotationForceMulti, landingBurnForceMulti;
+
+
+
+
+    public bool hasBeenLaunched;
 
     private void OnEnable()
     {
+        launchThrustSlider.EvtSliderValueChanged += ChangeLaunchForce;
+        landingBurnThrustSlider.EvtSliderValueChanged += ChangeLandingBurnForce;
+        rotateXslider.EvtSliderValueChanged += ChangeXrotationForce;
+        rotateYslider.EvtSliderValueChanged += ChangeYRotationForce;
+
         rb = GetComponent<Rigidbody>();
         averageSpeed = new Queue<Vector3>();
-
-        rotationForce = Vector2.zero;
-
-        RocketThrustController.EvtThrustInputChanged += ChangeForce;
-     //   rotationControl.EvtSliderValueChanged += ChangeRotationForce;
     }
-
 
 
     private void Update()
@@ -63,72 +66,62 @@ public class RocketPhysics : MonoBehaviour
         if (rb.velocity.y < maxFallSpeed)
             rb.velocity = new Vector3(rb.velocity.x, maxFallSpeed, rb.velocity.z);
 
-
-        //if (Input.GetKey(KeyCode.LeftArrow))
-        //    AddRotationForce(new Vector2(-1f, 0f));
-        //else if (Input.GetKey(KeyCode.RightArrow))
-        //    AddRotationForce(new Vector2(1f, 0f));
-        //else if (Input.GetKey(KeyCode.UpArrow))
-        //    AddRotationForce(new Vector2(0f, 1f));
-        //else if (Input.GetKey(KeyCode.DownArrow))
-        //    AddRotationForce(new Vector2(0f, -1f));
-
     }
 
 
 
-    private float fallSpeedBeforeImpact;
-
-
-
-    public void ChangeForce(float newForce)
+    public void ChangeLaunchForce(float newForce)
     {
-        currentForce = newForce * addForceMulti;
+        currentLaunchForce = newForce * launchForceMulti;
     }
 
 
-    public void ChangeRotationForce(Vector2 newForce)
+    public void ChangeLandingBurnForce(float newForce)
     {
-        rotationForce = newForce;
+        currentLandingBurnFoce = newForce * landingBurnForceMulti;
+    }
+
+    private void ChangeXrotationForce(float sliderValue)
+    {
+        xRotationForce = sliderValue * rotationForceMulti;
+    }
+
+    private void ChangeYRotationForce(float sliderValue)
+    {
+        yRotationForce = sliderValue * rotationForceMulti;
     }
 
 
-    public Vector3 TestVelocity;
 
-    [SerializeField]
-    private float addForceMulti;
 
     private void FixedUpdate()
     {
-        rb.AddForce(transform.up * currentForce);
+        rb.AddForce(transform.up * (currentLaunchForce + currentLandingBurnFoce));
 
         velocity = rb.velocity;
         velocity = new Vector3(Mathf.Clamp(velocity.x, -maxVelocity, maxVelocity),
                             Mathf.Clamp(velocity.y, -maxVelocity, maxVelocity),
                             Mathf.Clamp(velocity.z, -maxVelocity, maxVelocity));
 
-        //speedText.text = Vector3.Magnitude(velocity).ToString("F1") + " / " + Vector3.Magnitude(new Vector3(maxVelocity, maxVelocity, maxVelocity)).ToString("F1");
-        //not clamping
+
 
         rb.velocity = velocity;
-        TestVelocity = velocity;
         UpdateAverageSpeed(rb.velocity);
 
 
-        if (rotationForce != Vector2.zero)
-            AddRotationForce(rotationForce);
+
+        AddRotationForce();
     }
 
 
 
 
-    public float rotationForceMulti;
-
-
-
-    public void AddRotationForce(Vector2 force)
+    public void AddRotationForce()
     {
-        rb.AddRelativeTorque(new Vector3(force.y, 0f, force.x) * rotationForceMulti);
+        if (yRotationForce == 0f && xRotationForce == 0f)
+            return;
+
+        rb.AddRelativeTorque(new Vector3(yRotationForce, 0f, xRotationForce));
     }
 
 
@@ -136,17 +129,19 @@ public class RocketPhysics : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (!hasBeenLaunched) return;
 
-        if (GetAbsoluteFallSpeed() < settings.maxSpeedForLanding)
+
+        // don't use rb.velocity because it's 0 after the collision, get the average of the last 0.x seconds
+        if (GetVerticalSpeed() > maxSpeedForLanding)
         {
-            print(collision.relativeVelocity.z + " smaller than " + settings.maxSpeedForLanding);
+            //print(collision.relativeVelocity.z + " smaller than " + settings.maxSpeedForLanding);
 
             rb.isKinematic = true;
         }
         else
         {
             EvtRocketExploded(collision.contacts[0].point);
-            print("Should be exploding");
         }
 
     }
@@ -163,7 +158,7 @@ public class RocketPhysics : MonoBehaviour
 
 
 
-    public float GetAbsoluteFallSpeed()
+    public float GetVerticalSpeed()
     {
         float speed = 0f;
 
@@ -172,8 +167,7 @@ public class RocketPhysics : MonoBehaviour
             speed += entry.y;
         }
 
-        return Mathf.Abs(speed / averageSpeed.Count);
-
+        return speed / averageSpeed.Count;
     }
 
 
@@ -181,8 +175,6 @@ public class RocketPhysics : MonoBehaviour
 
     private void OnDisable()
     {
-        RocketThrustController.EvtThrustInputChanged -= ChangeForce;
-     //   rotationControl.EvtSliderValueChanged -= ChangeRotationForce;
 
     }
 

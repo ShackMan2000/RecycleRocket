@@ -2,25 +2,47 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class SliderControl : MonoBehaviour, IGrabbable
 {
-    public Transform SnapPoint { get => transform; }
 
 
-    //   public Transform TESTtarget;
+    [SerializeField]
+    private TextMeshProUGUI currentValueText;
+
+    public Transform SnapPoint { get => handle; }
+
+    [SerializeField]
+    private Transform handle;
+
 
     public Vector3 localPositionTemp;
 
+    [SerializeField]
+    private bool goesIntoNegative;
 
 
     public float maxSlide = 1f;
 
     public float SliderValue
     {
+
+
         get
         {
-            return (transform.localPosition.z + maxSlide) / (maxSlide * 2f);
+            float currentValue = 0f;
+
+            if (goesIntoNegative)
+                currentValue = handle.localPosition.z * (1f / maxSlide);
+            else
+                currentValue = (handle.localPosition.z + maxSlide) / (maxSlide * 2f);
+
+
+
+            currentValueText.text = currentValue.ToString("F1");
+            return currentValue;
+
         }
     }
 
@@ -28,14 +50,23 @@ public class SliderControl : MonoBehaviour, IGrabbable
 
 
 
+
+
+
+    [SerializeField]
+    private float handleStartPosition;
+
+    [SerializeField]
+    private Vector2 sliderRange;
+
+
     private Transform target;
 
-    //private void Update()
-    //{
-    //    MoveToHand(TESTtarget);
-    //}
+
 
     public event Action<float> EvtSliderValueChanged = delegate { };
+    public event Action EvtForcedStopGrabbing = delegate { };
+
 
 
 
@@ -48,8 +79,6 @@ public class SliderControl : MonoBehaviour, IGrabbable
 
 
 
-
-
     private void Update()
     {
         if (isGrabbed)
@@ -57,23 +86,42 @@ public class SliderControl : MonoBehaviour, IGrabbable
     }
 
 
-
-
-
     public void MoveToHand()
     {
-        localPositionTemp = transform.localPosition;
+        localPositionTemp = handle.localPosition;
+
+        handle.position = target.transform.position;
 
 
-        transform.position = target.transform.position;
+        float clampedZ = Mathf.Clamp(handle.localPosition.z, -maxSlide, maxSlide);
 
-
-        float clampedZ = Mathf.Clamp(transform.localPosition.z, -maxSlide, maxSlide);
-
-        transform.localPosition = new Vector3(localPositionTemp.x, localPositionTemp.y, clampedZ);
+        handle.localPosition = new Vector3(localPositionTemp.x, localPositionTemp.y, clampedZ);
 
         EvtSliderValueChanged(SliderValue);
     }
+
+
+
+    public void MoveWithHacker(float value)
+    {
+        //float newZ = value * maxSlide * 2f;
+
+        //float clampedZ = Mathf.Clamp(newZ, -maxSlide, maxSlide);
+
+        //transform.localPosition = new Vector3(localPositionTemp.x, localPositionTemp.y, clampedZ);
+        print(value);
+        EvtSliderValueChanged(value);
+    }
+
+
+
+    public void ForceStopGrabbing()
+    {
+        //inform the hand
+        EvtForcedStopGrabbing();
+        StopGrabbing();
+    }
+
 
 
     public void StopGrabbing()

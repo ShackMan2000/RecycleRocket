@@ -31,13 +31,25 @@ public class Hacker : MonoBehaviour
     //[SerializeField]
     //private RocketPhysics rocketPhysics;
 
+    [SerializeField]
+    private SliderControl launchThrust, landingBurn, xRotation, yRotation;
 
+
+    [Range(0f, 1f)]
+    public float launchSlider, landingBurnSlider;
+
+    [Range(-1f, 1f)]
+    public float xRotationSlider, yRotationSlider;
+
+
+    [SerializeField]
+    private LevelManager levelMan;
 
 
     private void OnEnable()
     {
         print("WARNING, hacker is in the scene");
-        
+
 
     }
 
@@ -51,14 +63,27 @@ public class Hacker : MonoBehaviour
 
         distanceToGrabText.text = handGrabber.currentDistanceHandToAnchor.ToString("F2");
 
-       // rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetAbsoluteFallSpeed().ToString("F1");
+        // rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetAbsoluteFallSpeed().ToString("F1");
     }
 
 
 
+
+
+    //private void OnValidate()
+    //{
+    //    if (levelMan.currentLevel == 0)
+    //        launchThrust.MoveWithHacker(launchSlider);
+    //    if (levelMan.currentLevel == 1)
+    //        landingBurn.MoveWithHacker(landingBurnSlider);
+
+    //    xRotation.MoveWithHacker(xRotationSlider);
+    //    yRotation.MoveWithHacker(yRotationSlider);
+    //}
+
     private void ReloadScene()
     {
-        Scene scene = SceneManager.GetActiveScene(); 
+        Scene scene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(scene.name);
     }
 

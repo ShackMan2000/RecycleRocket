@@ -48,56 +48,13 @@ public class RocketThrustController : MonoBehaviour
 
     private void Start()
     {
-        ThrustInputChanged(0f);
-
-
-    //    var gamePlayActionMap = playerControls.FindActionMap("XRI RightHand Interaction");
-
-    //    pressA = gamePlayActionMap.FindAction("Press A");
-     //   pressB = gamePlayActionMap.FindAction("Press B");
-
-
-        //   pressA.performed += SetThrustToOne;
+        ThrustInputChanged(0f);    
     }
 
-    //private void SetThrustToOne(InputAction.CallbackContext obj)
-    //{
-    //    // ThrustInputChanged(0.9f);
-    //}
 
 
 
 
-
-
-
-    //cap the thrust here so it doesn't send out weird stuff for the particles.
-
-
-    // the goal is to have sliders, so this should simply send out a value between 0 and 1 every time it changes. 
-    // the rocket then decides how to translate that into actual force
-    // for now could use button to increase and decrease (and add a check to not do anything if decreasing and already at 0
-
-
-    //private void Update()
-    //{
-    //    if (pressA.IsPressed())
-    //    {
-    //        ThrustSliderValue += Time.deltaTime;
-
-    //        // ThrustInputChanged(ThrustSliderValue);
-    //    }
-    //    else if(pressB.IsPressed())
-    //    {
-    //        ThrustSliderValue -= Time.deltaTime;
-    //        //    ThrustInputChanged(ThrustSliderValue);
-    //    }
-
-    //}
-
-
-
-    //not really necessary to rout through this script
 
 
     public void ThrustInputChanged(float newInput)
