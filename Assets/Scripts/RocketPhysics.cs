@@ -12,7 +12,7 @@ public class RocketPhysics : MonoBehaviour
     [SerializeField]
     private float maxFallSpeed = -10f;
 
-    public float currentLaunchForce, currentLandingBurnFoce;
+    public float currentLaunchForce, landingBreaksPercent;
 
 
     private float xRotationForce, yRotationForce;
@@ -27,6 +27,9 @@ public class RocketPhysics : MonoBehaviour
     private float maxVelocity;
 
 
+    [SerializeField]
+    private float minFallSpeedDuringLanding;
+
     public Queue<Vector3> averageSpeed;
 
 
@@ -34,27 +37,36 @@ public class RocketPhysics : MonoBehaviour
     private GameSettings settings;
 
 
+    public bool TESTInteractfallspeed;
+
+
     public static event Action<Vector3> EvtRocketExploded = delegate { };
 
 
-    [SerializeField]
-    private SliderControl launchThrustSlider, landingBurnThrustSlider, rotateXslider, rotateYslider;
+    //[SerializeField]
+    //private SliderControl launchThrustSlider, landingBurnThrustSlider, rotateXslider, rotateYslider;
 
 
     [SerializeField]
     private float launchForceMulti, rotationForceMulti, landingBurnForceMulti;
 
 
+    // some kind of force that gets multiplied exponentially based on falling speed, and is 0 or close to 0
+
+    // e.g. if fall speed is -50, there should be an extra force that checks what the real force input is, e.g. 10
+    // and adds a good chunk of what is needed to slow it down, maybe have a target force at which there is no more help.
+
+    // so e.g. have a maximum, like -10 
 
 
     public bool hasBeenLaunched;
 
     private void OnEnable()
     {
-        launchThrustSlider.EvtSliderValueChanged += ChangeLaunchForce;
-        landingBurnThrustSlider.EvtSliderValueChanged += ChangeLandingBurnForce;
-        rotateXslider.EvtSliderValueChanged += ChangeXrotationForce;
-        rotateYslider.EvtSliderValueChanged += ChangeYRotationForce;
+       // launchThrustSlider.EvtSliderValueChanged += ChangeLaunchForce;
+       // landingBurnThrustSlider.EvtSliderValueChanged += ChangeLandingBreaksPercent;
+      //  rotateXslider.EvtSliderValueChanged += ChangeXrotationForce;
+     //   rotateYslider.EvtSliderValueChanged += ChangeYRotationForce;
 
         rb = GetComponent<Rigidbody>();
         averageSpeed = new Queue<Vector3>();
@@ -66,6 +78,10 @@ public class RocketPhysics : MonoBehaviour
         if (rb.velocity.y < maxFallSpeed)
             rb.velocity = new Vector3(rb.velocity.x, maxFallSpeed, rb.velocity.z);
 
+
+        if (Input.GetKeyDown(KeyCode.N))
+            TESTInteractfallspeed = true;
+
     }
 
 
@@ -76,17 +92,17 @@ public class RocketPhysics : MonoBehaviour
     }
 
 
-    public void ChangeLandingBurnForce(float newForce)
+    public void ChangeLandingBreaksPercent(float newPercent)
     {
-        currentLandingBurnFoce = newForce * landingBurnForceMulti;
+        landingBreaksPercent = newPercent;// * landingBurnForceMulti;
     }
 
-    private void ChangeXrotationForce(float sliderValue)
+    public void ChangeXrotationForce(float sliderValue)
     {
         xRotationForce = sliderValue * rotationForceMulti;
     }
 
-    private void ChangeYRotationForce(float sliderValue)
+    public void ChangeYRotationForce(float sliderValue)
     {
         yRotationForce = sliderValue * rotationForceMulti;
     }
@@ -96,7 +112,7 @@ public class RocketPhysics : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.AddForce(transform.up * (currentLaunchForce + currentLandingBurnFoce));
+        rb.AddForce(transform.up * (currentLaunchForce));
 
         velocity = rb.velocity;
         velocity = new Vector3(Mathf.Clamp(velocity.x, -maxVelocity, maxVelocity),
@@ -111,12 +127,21 @@ public class RocketPhysics : MonoBehaviour
 
 
         AddRotationForce();
+
+        AddLandingBreakForce();
     }
 
+    private void AddLandingBreakForce()
+    {
+        if (rb.velocity.y > 0f) return;
 
+        float forceToAdd = landingBreaksPercent * (-rb.velocity.y + 9.7f);
+        forceToAdd -= minFallSpeedDuringLanding;
 
+        rb.AddForce(forceToAdd * transform.up);
+    }
 
-    public void AddRotationForce()
+    private void AddRotationForce()
     {
         if (yRotationForce == 0f && xRotationForce == 0f)
             return;
@@ -172,11 +197,6 @@ public class RocketPhysics : MonoBehaviour
 
 
 
-
-    private void OnDisable()
-    {
-
-    }
 
 
 

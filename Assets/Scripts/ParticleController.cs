@@ -39,16 +39,16 @@ public class ParticleController : MonoBehaviour
     private void OnEnable()
     {
 
-        RocketThrustController.EvtThrustInputChanged += SetStartSpeed;
+      //  RocketThrustController.EvtThrustInputChanged += SetStartSpeed;
 
 
         // smoke needs to move up and down, fire doesn't
-        if (minPosition != maxPosition)
-            RocketThrustController.EvtThrustInputChanged += SetPosition;
+        //if (minPosition != maxPosition)
+        //    RocketThrustController.EvtThrustInputChanged += SetPosition;
 
 
-        if (minEmission != maxEmission)
-            RocketThrustController.EvtThrustInputChanged += SetEmission;
+        //if (minEmission != maxEmission)
+        //    RocketThrustController.EvtThrustInputChanged += SetEmission;
 
 
         sysEmit = sys.emission;
@@ -92,13 +92,13 @@ public class ParticleController : MonoBehaviour
 
     private void OnDisable()
     {
-        RocketThrustController.EvtThrustInputChanged -= SetStartSpeed;
+        //RocketThrustController.EvtThrustInputChanged -= SetStartSpeed;
 
-        if (minPosition != maxPosition)
-            RocketThrustController.EvtThrustInputChanged -= SetPosition;
+        //if (minPosition != maxPosition)
+        //    RocketThrustController.EvtThrustInputChanged -= SetPosition;
 
-        if (minEmission != maxEmission)
-            RocketThrustController.EvtThrustInputChanged -= SetEmission;
+        //if (minEmission != maxEmission)
+        //    RocketThrustController.EvtThrustInputChanged -= SetEmission;
     }
 
 

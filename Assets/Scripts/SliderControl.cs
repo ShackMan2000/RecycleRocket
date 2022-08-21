@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Events;
 
 public class SliderControl : MonoBehaviour, IGrabbable
 {
@@ -54,7 +55,7 @@ public class SliderControl : MonoBehaviour, IGrabbable
 
 
     [SerializeField]
-    private float handleStartPosition;
+    private float startValue;
 
     [SerializeField]
     private Vector2 sliderRange;
@@ -64,11 +65,24 @@ public class SliderControl : MonoBehaviour, IGrabbable
 
 
 
-    public event Action<float> EvtSliderValueChanged = delegate { };
-    public event Action EvtForcedStopGrabbing = delegate { };
+  //  public event Action<float> EvtSliderValueChanged = delegate { };
+    //public event Action EvtForcedStopGrabbing = delegate { };
 
 
+    public UnityEvent<float> OnSliderValueChanged;
 
+    private void Awake()
+    {
+
+        //into negative not done yet
+        float startPositionZ = goesIntoNegative? startValue *  maxSlide * 2f : (startValue * maxSlide * 2f) - maxSlide;
+
+        handle.localPosition = new Vector3(handle.localPosition.x, handle.localPosition.y, startPositionZ);
+
+        OnSliderValueChanged.Invoke(SliderValue);
+
+
+    }
 
     public void StartGrabbing(Transform t)
     {
@@ -97,7 +111,8 @@ public class SliderControl : MonoBehaviour, IGrabbable
 
         handle.localPosition = new Vector3(localPositionTemp.x, localPositionTemp.y, clampedZ);
 
-        EvtSliderValueChanged(SliderValue);
+      //  EvtSliderValueChanged(SliderValue);
+        OnSliderValueChanged.Invoke(SliderValue);
     }
 
 
@@ -109,8 +124,10 @@ public class SliderControl : MonoBehaviour, IGrabbable
         //float clampedZ = Mathf.Clamp(newZ, -maxSlide, maxSlide);
 
         //transform.localPosition = new Vector3(localPositionTemp.x, localPositionTemp.y, clampedZ);
-        print(value);
-        EvtSliderValueChanged(value);
+        //EvtSliderValueChanged(value);
+        OnSliderValueChanged.Invoke(SliderValue);
+
+
     }
 
 
@@ -118,7 +135,7 @@ public class SliderControl : MonoBehaviour, IGrabbable
     public void ForceStopGrabbing()
     {
         //inform the hand
-        EvtForcedStopGrabbing();
+        //EvtForcedStopGrabbing();
         StopGrabbing();
     }
 

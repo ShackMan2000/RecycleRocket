@@ -42,8 +42,8 @@ public class Hacker : MonoBehaviour
     public float xRotationSlider, yRotationSlider;
 
 
-    [SerializeField]
-    private LevelManager levelMan;
+    //[SerializeField]
+    //private LevelManager levelMan;
 
 
     private void OnEnable()
@@ -70,16 +70,14 @@ public class Hacker : MonoBehaviour
 
 
 
-    //private void OnValidate()
-    //{
-    //    if (levelMan.currentLevel == 0)
-    //        launchThrust.MoveWithHacker(launchSlider);
-    //    if (levelMan.currentLevel == 1)
-    //        landingBurn.MoveWithHacker(landingBurnSlider);
+    private void OnValidate()
+    {
+            launchThrust.MoveWithHacker(launchSlider);
+            landingBurn.MoveWithHacker(landingBurnSlider);
 
-    //    xRotation.MoveWithHacker(xRotationSlider);
-    //    yRotation.MoveWithHacker(yRotationSlider);
-    //}
+        xRotation.MoveWithHacker(xRotationSlider);
+        yRotation.MoveWithHacker(yRotationSlider);
+    }
 
     private void ReloadScene()
     {
