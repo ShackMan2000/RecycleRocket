@@ -16,7 +16,7 @@ public class RocketChairTest : MonoBehaviour
     }
 
 
-    private void FixedUpdate()
+    private void Update()
     {
         transform.position = rocket.position + offset;
     }

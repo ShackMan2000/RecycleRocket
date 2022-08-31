@@ -119,14 +119,7 @@ public class SliderControl : MonoBehaviour, IGrabbable
 
     public void MoveWithHacker(float value)
     {
-        //float newZ = value * maxSlide * 2f;
-
-        //float clampedZ = Mathf.Clamp(newZ, -maxSlide, maxSlide);
-
-        //transform.localPosition = new Vector3(localPositionTemp.x, localPositionTemp.y, clampedZ);
-        //EvtSliderValueChanged(value);
-        OnSliderValueChanged.Invoke(SliderValue);
-
+  
 
     }
 
