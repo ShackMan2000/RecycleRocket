@@ -20,7 +20,7 @@ public class ControlPanelUI : MonoBehaviour
 
 
     [SerializeField]
-    private SliderControl thrustSlider;
+    private SliderC thrustSlider;
 
     [SerializeField]
     private RocketPhysics rocketPhysics;

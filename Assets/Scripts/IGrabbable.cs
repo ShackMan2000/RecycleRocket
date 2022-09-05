@@ -11,9 +11,15 @@ public interface IGrabbable
   //  bool IsGrabbed { get; }
 
 
-    public void StartGrabbing(Transform handAnchor);
+    Transform StartGrabbing(Transform handAnchor);
 
-    public void StopGrabbing();
+    void OnEnterRange();
+
+    void OnExitRange();
+
+    void SetClosestOne();
+
+    void StopGrabbing();
 
 
   //  public void MoveToHand(Transform t);

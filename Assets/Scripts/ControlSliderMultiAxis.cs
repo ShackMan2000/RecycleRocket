@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ControlSliderMultiAxis : MonoBehaviour, IGrabbable
+public class ControlSliderMultiAxis : MonoBehaviour//, IGrabbable
 {
 
 
@@ -148,8 +148,13 @@ public class ControlSliderMultiAxis : MonoBehaviour, IGrabbable
         EvtSliderValueChanged(new Vector2(0f, 0f));
     }
 
+    public void OnEnterRange()
+    {
+        throw new NotImplementedException();
+    }
 
-
-
-
+    public void SetClosestOne()
+    {
+        throw new NotImplementedException();
+    }
 }

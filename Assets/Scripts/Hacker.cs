@@ -32,7 +32,7 @@ public class Hacker : MonoBehaviour
     //private RocketPhysics rocketPhysics;
 
     [SerializeField]
-    private SliderControl launchThrust, landingBurn, xRotation, yRotation;
+    private SliderC launchThrust, landingBurn, xRotation, yRotation;
 
     public ExplosionManager failedExplosion;
 

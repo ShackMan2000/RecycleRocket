@@ -7,51 +7,37 @@ using UnityEngine.InputSystem;
 public class HandGrabber : MonoBehaviour
 {
 
-    // when the grab trigger button gets pressed, aka value bigger 0f, check if already grabbing
-    // if not, enable grabbing
-
-
-    // look for all interactables and grab the closest one. Could use an event, like when grab starts, a static event is sent out
-    // and they all pass their position to the hand, which then checks what is closest
-    // use a sphere collider you idiot
-
-
-    // need to figure out how to use this for different hands...
 
 
 
-    [SerializeField]
-    private Transform anchorHelper;
-
-
-    private List<IGrabbable> grabbableInRange;
+    List<IGrabbable> grabbablesInRange;
 
     public List<Transform> debugGrabbableInRange;
 
 
     private IGrabbable grabbedObject;
 
+
+    Transform grabbedSnappoint;
+
     [SerializeField]
     private InputActionAsset playerControls;
 
     private InputAction pressA, pressB, grab;
 
-  //  private Vector3 handOriginalLocaPosition; 
+    Vector3 handOriginalLocaPosition;
+    Vector3 handOriginalRotation;
 
-    public float maxDistanceHandToAnchor;
-
-    public float currentDistanceHandToAnchor;
-
-    public GameObject grabbableTest;
 
     [SerializeField]
-    private Transform handModel, handAnchor;
+    private Transform handModel;
 
 
     public bool isPushingGrabButton;
+    bool isGrabbing;
     public float grabValue;
 
-  
+
 
     // rocket only needs to know when thrust changes, can store the last input in a variable and change that through listening to this event
     public static event Action<float> EvtTryingToGrabSomethingNew = delegate { };
@@ -59,25 +45,16 @@ public class HandGrabber : MonoBehaviour
     // check some kind of min distance
 
 
-    private void Awake()
+    private void Start()
     {
-        //   ThrustInputChanged(0f);
-
-       // handOriginalLocaPosition = handModel.transform.localPosition;
-
-        grabbableInRange = new List<IGrabbable>();
+        grabbablesInRange = new List<IGrabbable>();
 
         var gamePlayActionMap = playerControls.FindActionMap("XRI RightHand Interaction");
 
-        //pressA = gamePlayActionMap.FindAction("Press A");
-        //pressB = gamePlayActionMap.FindAction("Press B");
-
         grab = gamePlayActionMap.FindAction("Grab");
 
-        //   pressA.performed += SetThrustToOne;
-
-        //grab.performed += CheckGrab;
-        //grab.Enable();
+        handOriginalLocaPosition = handModel.transform.localPosition;
+        handOriginalRotation = handModel.transform.localEulerAngles;
     }
 
 
@@ -88,18 +65,26 @@ public class HandGrabber : MonoBehaviour
         IGrabbable thingToGrab = other.GetComponent<IGrabbable>();
 
         if (thingToGrab != null)
-        {
-            if (!grabbableInRange.Contains(thingToGrab))
-            {
-                grabbableInRange.Add(thingToGrab);
-                debugGrabbableInRange.Add(other.transform);
-            }
-            else
-            {
-                print("WARNING, grabbable already in list, shouldn't happen because TriggerExit should remove it");
-            }
-        }
+            NewGrabbableInRange(thingToGrab);
     }
+
+
+
+
+
+
+    void NewGrabbableInRange(IGrabbable thingToGrab)
+    {
+        if (!grabbablesInRange.Contains(thingToGrab))
+        {
+            grabbablesInRange.Add(thingToGrab);
+            thingToGrab.OnEnterRange();
+            GetClosestGrabbableInRange().SetClosestOne();
+        }
+        else
+            print("WARNING, grabbable already in list, shouldn't happen because TriggerExit should remove it");
+    }
+
 
 
     private void OnTriggerExit(Collider other)
@@ -108,10 +93,10 @@ public class HandGrabber : MonoBehaviour
 
         if (thingToGrab != null)
         {
-            if (grabbableInRange.Contains(thingToGrab))
+            if (grabbablesInRange.Contains(thingToGrab))
             {
-                grabbableInRange.Remove(thingToGrab);
-                debugGrabbableInRange.Remove(other.transform);
+                grabbablesInRange.Remove(thingToGrab);
+                thingToGrab.OnExitRange();
             }
             else
             {
@@ -121,10 +106,13 @@ public class HandGrabber : MonoBehaviour
     }
 
 
-
-
-
     private void Update()
+    {
+        ReadGrabInput();
+    }
+
+
+    private void ReadGrabInput()
     {
         grabValue = grab.ReadValue<float>();
 
@@ -141,63 +129,42 @@ public class HandGrabber : MonoBehaviour
 
             if (grabbedObject != null)
                 StopGrabbing();
-
         }
-
     }
+
+
 
 
     private void LateUpdate()
     {
-       // MoveHand();
-
+        if (grabbedSnappoint)
+        {
+            handModel.rotation = grabbedSnappoint.rotation;
+            handModel.position = grabbedSnappoint.position;
+        }
     }
 
-    //private void MoveHand()
-    //{
-    //    if (grabbedObject != null)
-    //    {
-    //        handModel.transform.position = grabbedObject.SnapPoint.position;
 
-    //        CheckDistanceHandToGrabbedObject();
-    //    }
-    //}
+    private void TryToGrabSomething()
+    {
+        if (grabbablesInRange.Count == 0) return;
 
-    //private void CheckDistanceHandToGrabbedObject()
-    //{
+        grabbedObject = GetClosestGrabbableInRange();
+        grabbedSnappoint = grabbedObject.StartGrabbing(transform);
 
-    //    //problem here is that there is always a distance bc hand is not at 000
-    //    // for now just make distance bigger....
-    //    currentDistanceHandToAnchor = Vector3.Distance(handModel.transform.position, handAnchor.transform.position);
-    //    if (currentDistanceHandToAnchor > maxDistanceHandToAnchor)
-    //    {
-    //        StopGrabbing();
-    //    }
-    //}
+
+    }
 
     private void StopGrabbing()
     {
         grabbedObject.StopGrabbing();
         grabbedObject = null;
-       // handModel.transform.localPosition = handOriginalLocaPosition;
+        grabbedSnappoint = null;
+
+        handModel.transform.localPosition = handOriginalLocaPosition;
+        handModel.transform.localEulerAngles = handOriginalRotation;
     }
 
-    private void TryToGrabSomething()
-    {
-        //grabbableTest.GetComponent<IGrabbable>().StartGrabbing(transform);
-
-        //return;
-
-        if (grabbableInRange.Count == 0) return;
-
-
-        //change to grab the closest one
-        grabbedObject = GetClosestGrabbableInRange();
-
-        //for multiSlider this is redundant, but normal slider still needs it
-       // anchorHelper.transform.position = grabbedObject.SnapPoint.position;
-        grabbedObject.StartGrabbing(transform);
-    }
 
 
 
@@ -207,26 +174,22 @@ public class HandGrabber : MonoBehaviour
         float closestDistance = 11110f;
         IGrabbable closestGrabbable = null;
 
-
-        for (int i = 0; i < grabbableInRange.Count; i++)
+        for (int i = 0; i < grabbablesInRange.Count; i++)
         {
-            if (Vector3.Distance(transform.position, grabbableInRange[i].SnapPoint.position) < closestDistance)
+            if (Vector3.Distance(transform.position, grabbablesInRange[i].SnapPoint.position) < closestDistance)
             {
-                closestGrabbable = grabbableInRange[i];
-                closestDistance = Vector3.Distance(transform.position, grabbableInRange[i].SnapPoint.position);
+                closestGrabbable = grabbablesInRange[i];
+                closestDistance = Vector3.Distance(transform.position, grabbablesInRange[i].SnapPoint.position);
             }
-
         }
 
-
         return closestGrabbable;
-
     }
 
 
-    public void ThrustInputChanged(float newInput)
-    {
-        EvtTryingToGrabSomethingNew(newInput);
-    }
+
+
+
+  
 
 }

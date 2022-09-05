@@ -22,7 +22,7 @@ public class LevelManager : MonoBehaviour
 
 
     [SerializeField]
-    private SliderControl launchThrust, landingBurn, xRotation, yRotation;
+    private SliderC launchThrust, landingBurn, xRotation, yRotation;
 
 
     [SerializeField]

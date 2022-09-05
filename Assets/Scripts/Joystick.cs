@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Joystick : MonoBehaviour, IGrabbable
+public class Joystick : MonoBehaviour//, IGrabbable
 {
 
     public Transform stick, stickTarget, handAnchor;
@@ -107,5 +107,13 @@ public class Joystick : MonoBehaviour, IGrabbable
         isGrabbed = false;
     }
 
+    public void OnEnterRange()
+    {
+        throw new NotImplementedException();
+    }
 
+    public void SetClosestOne()
+    {
+        throw new NotImplementedException();
+    }
 }
