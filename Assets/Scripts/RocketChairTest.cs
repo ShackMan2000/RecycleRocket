@@ -13,6 +13,8 @@ public class RocketChairTest : MonoBehaviour
     private void Awake()
     {
         offset = transform.position - rocket.position;
+        //Debug d = new Debug();
+        //d.VR
     }
 
 

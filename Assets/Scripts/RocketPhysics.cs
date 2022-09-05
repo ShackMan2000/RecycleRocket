@@ -62,16 +62,17 @@ public class RocketPhysics : MonoBehaviour
     public bool hasBeenLaunched;
 
     private void OnEnable()
-    {
-       // launchThrustSlider.EvtSliderValueChanged += ChangeLaunchForce;
-       // landingBurnThrustSlider.EvtSliderValueChanged += ChangeLandingBreaksPercent;
-      //  rotateXslider.EvtSliderValueChanged += ChangeXrotationForce;
-     //   rotateYslider.EvtSliderValueChanged += ChangeYRotationForce;
+    {      
 
         rb = GetComponent<Rigidbody>();
         averageSpeed = new Queue<Vector3>();
     }
 
+    private void Start()
+    {
+        DebugVR.TrackValue(this, nameof(velocity));
+        
+    }
 
     private void Update()
     {

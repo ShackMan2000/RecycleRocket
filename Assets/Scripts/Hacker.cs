@@ -34,6 +34,7 @@ public class Hacker : MonoBehaviour
     [SerializeField]
     private SliderControl launchThrust, landingBurn, xRotation, yRotation;
 
+    public ExplosionManager failedExplosion;
 
     [Range(0f, 1f)]
     public float launchSlider, landingBurnSlider;
@@ -50,7 +51,6 @@ public class Hacker : MonoBehaviour
     {
         print("WARNING, hacker is in the scene");
 
-
     }
 
 
@@ -61,7 +61,6 @@ public class Hacker : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
             ReloadScene();
 
-        distanceToGrabText.text = handGrabber.currentDistanceHandToAnchor.ToString("F2");
 
         // rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetAbsoluteFallSpeed().ToString("F1");
     }
@@ -70,14 +69,30 @@ public class Hacker : MonoBehaviour
 
 
 
-    private void OnValidate()
-    {
-            launchThrust.MoveWithHacker(launchSlider);
-            landingBurn.MoveWithHacker(landingBurnSlider);
+    //private void OnValidate()
+    //{
+    //        launchThrust.MoveWithHacker(launchSlider);
+    //        landingBurn.MoveWithHacker(landingBurnSlider);
 
-        xRotation.MoveWithHacker(xRotationSlider);
-        yRotation.MoveWithHacker(yRotationSlider);
+    //    xRotation.MoveWithHacker(xRotationSlider);
+    //    yRotation.MoveWithHacker(yRotationSlider);
+    //}
+
+
+
+    [ContextMenu("fail")]
+    public void Faill()
+    {
+        failedExplosion.CreateExplosion(Vector3.zero);
     }
+
+
+    [ContextMenu("debug")]
+    public void Debugll()
+    {
+        Debug.Log("aaaaaaaaaaaaaaaaasdfdfgadfgggggggafdsgadsfgsdfgsdfgsdfg");
+    }
+
 
     private void ReloadScene()
     {

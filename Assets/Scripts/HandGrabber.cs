@@ -67,8 +67,6 @@ public class HandGrabber : MonoBehaviour
 
         grabbableInRange = new List<IGrabbable>();
 
-
-
         var gamePlayActionMap = playerControls.FindActionMap("XRI RightHand Interaction");
 
         //pressA = gamePlayActionMap.FindAction("Press A");
