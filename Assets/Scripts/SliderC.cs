@@ -5,19 +5,15 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.Events;
 
-public class SliderC : MonoBehaviour, IGrabbable
+public class SliderC : MonoBehaviour
 {
 
 
-    [SerializeField]
-    private TextMeshProUGUI currentValueText;
+    [SerializeField] TextMeshProUGUI currentValueText;
 
+    [SerializeField] GrabPoint grabPoint;
 
-    [SerializeField] Transform snappointHandle;
-    public Transform SnapPoint { get => snappointHandle; }
-
-    [SerializeField]
-    private Transform handle;
+    private Transform grabPointTransform;
 
     public Vector3 localPositionTemp;
 
@@ -26,11 +22,7 @@ public class SliderC : MonoBehaviour, IGrabbable
 
     public float maxSlide = 1f;
 
-    Material defaultMat;
 
-    [SerializeField] Material inRangeMat, closestOneMat, grabbedMat;
-
-    MeshRenderer handleRenderer;
 
 
     public float SliderValue
@@ -40,9 +32,9 @@ public class SliderC : MonoBehaviour, IGrabbable
             float currentValue = 0f;
 
             if (goesIntoNegative)
-                currentValue = handle.localPosition.z * (1f / maxSlide);
+                currentValue = grabPointTransform.localPosition.z * (1f / maxSlide);
             else
-                currentValue = (handle.localPosition.z + maxSlide) / (maxSlide * 2f);
+                currentValue = (grabPointTransform.localPosition.z + maxSlide) / (maxSlide * 2f);
 
             currentValueText.text = currentValue.ToString("F1");
             return currentValue;
@@ -79,36 +71,34 @@ public class SliderC : MonoBehaviour, IGrabbable
 
     private void Awake()
     {
-        handleRenderer = handle.GetComponent<MeshRenderer>();
-        defaultMat = handleRenderer.material;
-        //into negative not done yet
+        grabPointTransform = grabPoint.transform;
+
         float startPositionZ = goesIntoNegative? startValue *  maxSlide * 2f : (startValue * maxSlide * 2f) - maxSlide;
 
-        handle.localPosition = new Vector3(handle.localPosition.x, handle.localPosition.y, startPositionZ);
+        grabPointTransform.localPosition = new Vector3(grabPointTransform.localPosition.x, grabPointTransform.localPosition.y, startPositionZ);
 
         OnSliderValueChanged.Invoke(SliderValue);
 
         DebugVR.TrackValue(this, nameof(offsetOnGrab));
         DebugVR.TrackValue(this, nameof(handInLocalSpace));
+    }
 
+    private void OnEnable()
+    {
+        grabPoint.OnStartGrabbing += StartGrabbing;
+        grabPoint.OnStopGrabbing += StopGrabbing;
     }
 
 
 
-    public Transform StartGrabbing(Transform t)
+    public void StartGrabbing(Transform grabber)
     {
-
-        target = t;
+        target = grabber;
         isGrabbed = true;
-        handleRenderer.material = grabbedMat;
-        handleLocalStartPos = handle.transform.localPosition;
-
-        Vector3 targetPosition = target.transform.position;        
+        handleLocalStartPos = grabPointTransform.transform.localPosition;
 
         handInLocalSpace = Vector3.Scale(sliderBase.InverseTransformPoint(target.position), sliderBase.lossyScale);
         offsetOnGrab = handInLocalSpace.z;
-
-        return SnapPoint;
     }
 
 
@@ -124,15 +114,13 @@ public class SliderC : MonoBehaviour, IGrabbable
 
 
 
-
-
     public void MoveToHand()
     {
         float newHandPosition = Vector3.Scale(sliderBase.InverseTransformPoint(target.position), sliderBase.lossyScale).z;
         handMovedSinceGrab = newHandPosition - offsetOnGrab;
 
         float clampedZ = Mathf.Clamp(handleLocalStartPos.z + handMovedSinceGrab, -maxSlide, maxSlide);
-        handle.localPosition = new Vector3(handleLocalStartPos.x, handleLocalStartPos.y, clampedZ);
+        grabPointTransform.localPosition = new Vector3(handleLocalStartPos.x, handleLocalStartPos.y, clampedZ);
 
         OnSliderValueChanged.Invoke(SliderValue);
     }
@@ -141,23 +129,15 @@ public class SliderC : MonoBehaviour, IGrabbable
 
     public void StopGrabbing()
     {
-        handleRenderer.material = inRangeMat;
         isGrabbed = false;
     }
 
 
-    public void OnEnterRange()
+
+    private void OnDisable()
     {
-        handleRenderer.material = inRangeMat;
+        grabPoint.OnStartGrabbing -= StartGrabbing;
+        grabPoint.OnStopGrabbing -= StopGrabbing;
     }
 
-    public void SetClosestOne()
-    {
-        handleRenderer.material = closestOneMat;
-    }
-
-    public void OnExitRange()
-    {
-        handleRenderer.material = defaultMat;
-    }
 }

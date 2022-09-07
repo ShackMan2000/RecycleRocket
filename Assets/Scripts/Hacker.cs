@@ -43,6 +43,8 @@ public class Hacker : MonoBehaviour
     public float xRotationSlider, yRotationSlider;
 
 
+    public GameObject rocket;
+
     //[SerializeField]
     //private LevelManager levelMan;
 
@@ -61,6 +63,11 @@ public class Hacker : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
             ReloadScene();
 
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+            rocket.transform.position = new Vector3(rocket.transform.position.x,
+                rocket.transform.position.y + 300f,
+                rocket.transform.position.z);
 
         // rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetAbsoluteFallSpeed().ToString("F1");
     }

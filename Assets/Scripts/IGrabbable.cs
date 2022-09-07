@@ -4,6 +4,7 @@ using UnityEngine;
 
 public interface IGrabbable
 {
+    //could actually get rid of update, and have the grabber run an update that calls a method here when it is grabbing it.
 
     Transform SnapPoint { get; }
 
@@ -13,9 +14,9 @@ public interface IGrabbable
 
     Transform StartGrabbing(Transform handAnchor);
 
-    void OnEnterRange();
+    void EnterRange();
 
-    void OnExitRange();
+    void ExitRange();
 
     void SetClosestOne();
 

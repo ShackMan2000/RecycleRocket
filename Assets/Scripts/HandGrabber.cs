@@ -9,6 +9,9 @@ public class HandGrabber : MonoBehaviour
 
 
 
+    // maybe use snappoint as script, that sends out an event to it's grabbable. Maybe use grappoint.
+    // 
+
 
     List<IGrabbable> grabbablesInRange;
 
@@ -62,9 +65,7 @@ public class HandGrabber : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        IGrabbable thingToGrab = other.GetComponent<IGrabbable>();
-
-        if (thingToGrab != null)
+        if (other.TryGetComponent(out IGrabbable thingToGrab))
             NewGrabbableInRange(thingToGrab);
     }
 
@@ -78,7 +79,7 @@ public class HandGrabber : MonoBehaviour
         if (!grabbablesInRange.Contains(thingToGrab))
         {
             grabbablesInRange.Add(thingToGrab);
-            thingToGrab.OnEnterRange();
+            thingToGrab.EnterRange();
             GetClosestGrabbableInRange().SetClosestOne();
         }
         else
@@ -89,14 +90,12 @@ public class HandGrabber : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        IGrabbable thingToGrab = other.GetComponent<IGrabbable>();
-
-        if (thingToGrab != null)
+        if (other.TryGetComponent(out IGrabbable grabbable))
         {
-            if (grabbablesInRange.Contains(thingToGrab))
+            if (grabbablesInRange.Contains(grabbable))
             {
-                grabbablesInRange.Remove(thingToGrab);
-                thingToGrab.OnExitRange();
+                grabbablesInRange.Remove(grabbable);
+                grabbable.ExitRange();
             }
             else
             {
@@ -190,6 +189,6 @@ public class HandGrabber : MonoBehaviour
 
 
 
-  
+
 
 }

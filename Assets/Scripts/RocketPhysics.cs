@@ -14,6 +14,7 @@ public class RocketPhysics : MonoBehaviour
 
     public float currentLaunchForce, landingBreaksPercent;
 
+    public bool enginesStarted;
 
     private float xRotationForce, yRotationForce;
 
@@ -37,34 +38,22 @@ public class RocketPhysics : MonoBehaviour
     private GameSettings settings;
 
 
-    public bool TESTInteractfallspeed;
 
 
     public static event Action<Vector3> EvtRocketExploded = delegate { };
-
-
-    //[SerializeField]
-    //private SliderControl launchThrustSlider, landingBurnThrustSlider, rotateXslider, rotateYslider;
 
 
     [SerializeField]
     private float launchForceMulti, rotationForceMulti, landingBurnForceMulti;
 
 
-    // some kind of force that gets multiplied exponentially based on falling speed, and is 0 or close to 0
-
-    // e.g. if fall speed is -50, there should be an extra force that checks what the real force input is, e.g. 10
-    // and adds a good chunk of what is needed to slow it down, maybe have a target force at which there is no more help.
-
-    // so e.g. have a maximum, like -10 
-
 
     public bool hasBeenLaunched;
 
     private void OnEnable()
     {      
-
         rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
         averageSpeed = new Queue<Vector3>();
     }
 
@@ -78,17 +67,23 @@ public class RocketPhysics : MonoBehaviour
     {
         if (rb.velocity.y < maxFallSpeed)
             rb.velocity = new Vector3(rb.velocity.x, maxFallSpeed, rb.velocity.z);
-
-
-        if (Input.GetKeyDown(KeyCode.N))
-            TESTInteractfallspeed = true;
-
     }
+
+
 
 
 
     public void ChangeLaunchForce(float newForce)
     {
+
+        //just for now to test without rocket tipping over
+        if (!enginesStarted && newForce > 0)
+        {
+            rb.isKinematic = false;
+            enginesStarted = true;
+        }
+
+
         currentLaunchForce = newForce * launchForceMulti;
     }
 
@@ -113,6 +108,8 @@ public class RocketPhysics : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!enginesStarted) return;
+
         rb.AddForce(transform.up * (currentLaunchForce));
 
         velocity = rb.velocity;
