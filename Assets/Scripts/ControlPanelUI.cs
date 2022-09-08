@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System;
 
 public class ControlPanelUI : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class ControlPanelUI : MonoBehaviour
 
 
     [SerializeField]
-    private TextMeshProUGUI rocketSpeedText, thrustSliderValueText, rotateForceText;
+    private TextMeshProUGUI rocketSpeedText, rocketHeightText, thrustSliderValueText, rotateForceText;
 
     [SerializeField]
     private Rigidbody rocketRigidBody;
@@ -29,21 +30,34 @@ public class ControlPanelUI : MonoBehaviour
     [SerializeField]
     private ControlSliderMultiAxis rotationControl;
 
+    [SerializeField] RocketData rocketData;
 
 
     private void OnEnable()
     {
-        //rotationControl.EvtSliderValueChanged += ShowRotationForceText;
-        //rotateForceText.text = "0 rot";
+        rocketData.RealHeightChanged += RefreshUI;
+        rocketData.FakeHeightChanged += RefreshUI;
+        rocketData.RealSpeedChanged += RefreshUI;
+        rocketData.FakeSpeedChanged += RefreshUI;
+    }
+
+
+
+    private void RefreshUI()
+    {
+        float speedKmh = rocketData.TotalSpeed * 3.6f;
+        float fakeSpeed = rocketData.AddedSpeed * 3.6f;
+        rocketSpeedText.text = $"speed: {speedKmh.ToString("F0")} (fake {fakeSpeed.ToString("F0")}";
+        rocketHeightText.text = $"height: {rocketData.TotalHeight.ToString("F0")} (fake {rocketData.AddedHeight.ToString("F0")}";
     }
 
 
 
     private void Update()
     {
-        rocketSpeedText.text = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetVerticalSpeed().ToString("F1");
+       //  = rocketRigidBody.velocity.ToString("F1") + " avg:" + rocketPhysics.GetVerticalSpeed().ToString("F1");
 
-       // thrustSliderValueText.text = thrustSlider.SliderValue.ToString("F1");
+        // thrustSliderValueText.text = thrustSlider.SliderValue.ToString("F1");
     }
 
 
@@ -61,6 +75,9 @@ public class ControlPanelUI : MonoBehaviour
 
     private void OnDisable()
     {
-     //   rotationControl.EvtSliderValueChanged -= ShowRotationForceText;
+        rocketData.RealHeightChanged -= RefreshUI;
+        rocketData.FakeHeightChanged -= RefreshUI;
+        rocketData.RealSpeedChanged -= RefreshUI;
+        rocketData.FakeSpeedChanged -= RefreshUI;
     }
 }

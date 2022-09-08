@@ -18,14 +18,14 @@ public class RocketPhysics : MonoBehaviour
 
     private float xRotationForce, yRotationForce;
 
-    public Vector3 velocity;
+    public float speed;
 
 
     [SerializeField]
     private float maxSpeedForLanding;
 
     [SerializeField]
-    private float maxVelocity;
+    private float maxUpSpeed;
 
 
     [SerializeField]
@@ -33,7 +33,7 @@ public class RocketPhysics : MonoBehaviour
 
     public Queue<Vector3> averageSpeed;
 
-    [SerializeField] Height height;
+    [SerializeField] RocketData data;
 
 
     [SerializeField]
@@ -59,11 +59,11 @@ public class RocketPhysics : MonoBehaviour
         averageSpeed = new Queue<Vector3>();
     }
 
+   
     private void Start()
     {
-        DebugVR.TrackValue(this, nameof(velocity));
+        DebugVR.TrackValue(this, nameof(speed));
         //   DebugVR.TrackValue(height, ("realHeight"));
-
     }
 
     //private void Update()
@@ -92,8 +92,7 @@ public class RocketPhysics : MonoBehaviour
 
     void Launch()
     {
-        height.SetRealHeight(transform.position.y);
-        height.SetFakeHeight(0f);
+        data.Reset();
 
         fakeSpeed = 0f;
         rb.isKinematic = false;
@@ -117,58 +116,41 @@ public class RocketPhysics : MonoBehaviour
     }
 
 
+    //maybe don't use gravity on the way up and simply prevent the slider from going down while launching...
 
-
-    float speed;
 
 
     private void FixedUpdate()
     {
+
+
         if (!enginesStarted) return;
-
-
-
 
         speed += speedIncrease * Time.fixedDeltaTime;
 
-        //this changes the velocity by exactly that value
-        rb.AddForce(transform.up * speedIncrease);
+        //gravity
+        // speed -= 10f * Time.fixedDeltaTime;
+        //account for falling as well later
 
-        velocity = rb.velocity;
+        var cappedSpeed = speed.Cap(maxFallSpeed, maxUpSpeed);
 
-        // fucking hell, need to save fakespeed;
-        // calculate some drag here
-        // need to account for falling as well, maybe make custom extension of float the returns the removed amount
+        data.ChangeRealHeight(cappedSpeed.newValue * Time.fixedDeltaTime);
+        rb.velocity = new Vector3(0f,cappedSpeed.newValue,0f);
 
-        if (rb.velocity.y > maxVelocity)
-        {
-            height.AddRealHeight(maxVelocity * Time.fixedDeltaTime);
-            height.AddFakeHeight((rb.velocity.y - maxVelocity) * Time.fixedDeltaTime);
-
-        }
-        else
-        {
-            height.AddRealHeight(rb.velocity.y * Time.fixedDeltaTime);
-        }
+        data.ChangeAddedHeight(-cappedSpeed.changedBy * Time.deltaTime);
 
 
+        
 
-        velocity = new Vector3(Mathf.Clamp(velocity.x, -maxVelocity, maxVelocity),
-                            Mathf.Clamp(velocity.y, -maxVelocity, maxVelocity),
-                            Mathf.Clamp(velocity.z, -maxVelocity, maxVelocity));
-
+        data.SetRealSpeed(speed);
 
 
-        rb.velocity = velocity;
-
-
-        UpdateAverageSpeed(rb.velocity);
-
-
+        //UpdateAverageSpeed(rb.velocity);
 
         AddRotationForce();
 
-        AddLandingBreakForce();
+        //rewrite for directly speed
+      //  AddLandingBreakForce();
 
     }
 
@@ -216,15 +198,15 @@ public class RocketPhysics : MonoBehaviour
 
     }
 
-    private void UpdateAverageSpeed(Vector3 speed)
-    {
-        averageSpeed.Enqueue(speed);
+    //private void UpdateAverageSpeed(Vector3 speed)
+    //{
+    //    averageSpeed.Enqueue(speed);
 
 
-        if (averageSpeed.Count > 20)
-            averageSpeed.Dequeue();
+    //    if (averageSpeed.Count > 20)
+    //        averageSpeed.Dequeue();
 
-    }
+    //}
 
 
 
@@ -246,7 +228,10 @@ public class RocketPhysics : MonoBehaviour
 
 
 
-
+    private void OnDisable()
+    {
+        data.Reset();
+    }
 
 
 

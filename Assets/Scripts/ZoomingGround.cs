@@ -16,18 +16,20 @@ public class ZoomingGround : MonoBehaviour
 
     [SerializeField] List<float> heightLevels;
 
+    [SerializeField] Transform groundContainer;
+
+    //use this to make sure player is in the air a little bit
+    [SerializeField] float effectStartHeight;
+
+    [SerializeField] RocketData heightSO;
+
 
     public float height;
 
     Material material;
 
     [SerializeField] float zoomPerSec;
-
-    //private void Update()
-    //{
-    //    SetZoomLevel()
-    //}
-
+ 
 
     public Transform rocket;
 
@@ -62,6 +64,10 @@ public class ZoomingGround : MonoBehaviour
         height = rocket.position.y;
         AdjustTextureToZoom();
 
+
+        if (heightSO.TotalHeight > effectStartHeight)
+            ScaleGroundContainer();
+
     }
 
 
@@ -73,11 +79,23 @@ public class ZoomingGround : MonoBehaviour
         SetZoom();
     }
 
+
+    void ScaleGroundContainer()
+    {
+     //yes, only use added height and start right away when it is bigger than 0
+
+        float heightAboveEffectStart = heightSO.TotalHeight / effectStartHeight;
+        float newScale = 1f / heightAboveEffectStart;
+        
+        groundContainer.localScale = new Vector3(newScale, newScale, newScale);
+
+
+    }
+
     private void SetZoom()
     {
         float heightThisStep = heightLevels[currentHeightLevel] / 2f;
         float percentageOfCurrentLevel = (height - heightThisStep) / heightThisStep;
-
 
         material.SetFloat(scaleID, 2f - percentageOfCurrentLevel);
     }
@@ -114,7 +132,7 @@ public class ZoomingGround : MonoBehaviour
 
         if (currentHeightLevel != oldHeightLevel)
         {
-            Debug.Log(currentHeightLevel);
+           // Debug.Log(currentHeightLevel);
             material.SetTexture(textureID, groundTextures[currentHeightLevel]);
         }
     }

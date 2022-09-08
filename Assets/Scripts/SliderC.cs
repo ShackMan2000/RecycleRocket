@@ -133,6 +133,12 @@ public class SliderC : MonoBehaviour
     }
 
 
+    [ContextMenu("SetToOne")]
+    public void SetToOne()
+    {
+        OnSliderValueChanged.Invoke(1f);
+    }
+
 
     private void OnDisable()
     {
