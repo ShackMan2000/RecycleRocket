@@ -12,7 +12,7 @@ public class RocketPhysics : MonoBehaviour
     [SerializeField]
     private float maxFallSpeed = -10f;
 
-    public float currentLaunchForce, landingBreaksPercent;
+    public float speedIncrease, landingBreaksPercent;
 
     public bool enginesStarted;
 
@@ -33,12 +33,14 @@ public class RocketPhysics : MonoBehaviour
 
     public Queue<Vector3> averageSpeed;
 
+    [SerializeField] Height height;
+
 
     [SerializeField]
     private GameSettings settings;
 
 
-
+    float fakeSpeed;
 
     public static event Action<Vector3> EvtRocketExploded = delegate { };
 
@@ -51,7 +53,7 @@ public class RocketPhysics : MonoBehaviour
     public bool hasBeenLaunched;
 
     private void OnEnable()
-    {      
+    {
         rb = GetComponent<Rigidbody>();
         rb.isKinematic = true;
         averageSpeed = new Queue<Vector3>();
@@ -60,14 +62,15 @@ public class RocketPhysics : MonoBehaviour
     private void Start()
     {
         DebugVR.TrackValue(this, nameof(velocity));
-        
+        //   DebugVR.TrackValue(height, ("realHeight"));
+
     }
 
-    private void Update()
-    {
-        if (rb.velocity.y < maxFallSpeed)
-            rb.velocity = new Vector3(rb.velocity.x, maxFallSpeed, rb.velocity.z);
-    }
+    //private void Update()
+    //{
+    //    if (rb.velocity.y < maxFallSpeed)
+    //        rb.velocity = new Vector3(rb.velocity.x, maxFallSpeed, rb.velocity.z);
+    //}
 
 
 
@@ -79,12 +82,22 @@ public class RocketPhysics : MonoBehaviour
         //just for now to test without rocket tipping over
         if (!enginesStarted && newForce > 0)
         {
-            rb.isKinematic = false;
-            enginesStarted = true;
+            Launch();
         }
 
 
-        currentLaunchForce = newForce * launchForceMulti;
+        speedIncrease = newForce * launchForceMulti;
+    }
+
+
+    void Launch()
+    {
+        height.SetRealHeight(transform.position.y);
+        height.SetFakeHeight(0f);
+
+        fakeSpeed = 0f;
+        rb.isKinematic = false;
+        enginesStarted = true;
     }
 
 
@@ -106,13 +119,40 @@ public class RocketPhysics : MonoBehaviour
 
 
 
+    float speed;
+
+
     private void FixedUpdate()
     {
         if (!enginesStarted) return;
 
-        rb.AddForce(transform.up * (currentLaunchForce));
+
+
+
+        speed += speedIncrease * Time.fixedDeltaTime;
+
+        //this changes the velocity by exactly that value
+        rb.AddForce(transform.up * speedIncrease);
 
         velocity = rb.velocity;
+
+        // fucking hell, need to save fakespeed;
+        // calculate some drag here
+        // need to account for falling as well, maybe make custom extension of float the returns the removed amount
+
+        if (rb.velocity.y > maxVelocity)
+        {
+            height.AddRealHeight(maxVelocity * Time.fixedDeltaTime);
+            height.AddFakeHeight((rb.velocity.y - maxVelocity) * Time.fixedDeltaTime);
+
+        }
+        else
+        {
+            height.AddRealHeight(rb.velocity.y * Time.fixedDeltaTime);
+        }
+
+
+
         velocity = new Vector3(Mathf.Clamp(velocity.x, -maxVelocity, maxVelocity),
                             Mathf.Clamp(velocity.y, -maxVelocity, maxVelocity),
                             Mathf.Clamp(velocity.z, -maxVelocity, maxVelocity));
@@ -120,6 +160,8 @@ public class RocketPhysics : MonoBehaviour
 
 
         rb.velocity = velocity;
+
+
         UpdateAverageSpeed(rb.velocity);
 
 
@@ -127,7 +169,12 @@ public class RocketPhysics : MonoBehaviour
         AddRotationForce();
 
         AddLandingBreakForce();
+
     }
+
+
+
+
 
     private void AddLandingBreakForce()
     {

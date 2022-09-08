@@ -31,11 +31,15 @@ public class ZoomingGround : MonoBehaviour
 
     public Transform rocket;
 
+    int scaleID;
+    int textureID;
 
     private void Awake()
     {
         material = meshRenderer.material;
         SetHeightLevels();
+        scaleID = Shader.PropertyToID("_Scale");
+        textureID = Shader.PropertyToID("_Texture");
     }
 
 
@@ -75,7 +79,7 @@ public class ZoomingGround : MonoBehaviour
         float percentageOfCurrentLevel = (height - heightThisStep) / heightThisStep;
 
 
-        material.SetFloat("_Scale", 2f - percentageOfCurrentLevel);
+        material.SetFloat(scaleID, 2f - percentageOfCurrentLevel);
     }
 
     void SetCurrentHeightLevel()
@@ -111,7 +115,7 @@ public class ZoomingGround : MonoBehaviour
         if (currentHeightLevel != oldHeightLevel)
         {
             Debug.Log(currentHeightLevel);
-            material.SetTexture("_Texture", groundTextures[currentHeightLevel]);
+            material.SetTexture(textureID, groundTextures[currentHeightLevel]);
         }
     }
 
